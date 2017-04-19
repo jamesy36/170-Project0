@@ -36,14 +36,16 @@ char *parse(){
 	char *read_c = new char[read.length() + 1];
 	std::strcpy (read_c, read.c_str());
 	
+	//for testing
+	std::cout << "Parsed successfully \n";
 	return read_c;
 }
 
 char **tokenize(char *line){
 	//TODO: test? 
-	//int buf = 640; //maybe reallocate when full later?
+	int buf = 640; //maybe reallocate when full later?
 	char *token;
-	char **tokens;
+	char **tokens = (char**) malloc(buf * sizeof(char*));
 	char delimeter[] = " \t;\n";
 	int i = 0;
 	
@@ -54,6 +56,9 @@ char **tokenize(char *line){
 		token = strtok(NULL, delimeter);
 	}
 	tokens[i] = NULL;
+	
+	//for testing
+	std::cout << "Tokenized successfully \n";
 	return tokens;
 }
 
