@@ -13,8 +13,7 @@ int execute(char **args){
 }
 
 char *parse(){
-	//TODO: test?
-	size_t buf = 0;
+	//TODO: test? it compiles
 	std::string read;
 	std::getline(std::cin, read); //thank you c++ gods for making this function
 	char *read_c = new char[read.length() + 1];
@@ -24,11 +23,20 @@ char *parse(){
 }
 
 char **tokenize(char *line){
-	//TODO: implement
+	//TODO: test? 
+	//int buf = 640; //maybe reallocate when full later?
 	char *token;
 	char **tokens;
 	char delimeter[] = " \t;\n";
+	int i = 0;
 	
+	token = strtok(line, delimeter);
+	while (token != NULL){
+		tokens[i] = token;
+		i++;
+		token = strtok(NULL, delimeter);
+	}
+	tokens[i] = NULL;
 	return tokens;
 }
 
@@ -40,8 +48,8 @@ void shell_loop(){
 	int running;
 	
 	do{
-		//idk... because that's what shells do for some reason..\
-		looks fresh
+		//idk... because that's what shells do for some reason.. 
+		//looks fresh I guess
 		std::cout << "> ";
 		
 		//read line
