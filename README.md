@@ -1,5 +1,5 @@
 # 170-Project0
--built in commands(cd, pwd, etc)
+-built in commands(only exit apparently, only stuff that works with fork + exec)
 -commands(requires parser)
 -execute function
 -getcommand -> can possibly just put it in parser maybe?
