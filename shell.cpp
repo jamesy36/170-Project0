@@ -8,8 +8,25 @@
 #include <string> //getline
 #include <cstring>
 
-int execute(char **args){
-	return 0;
+int execute(char **args_list){
+	//1 means keep looping, 0 means stop execution
+	int iterator;
+	
+	if (args_list[0] == NULL){
+		return 1;
+	}
+	
+	//temp loop for testing
+	for (iterator = 0; iterator < 10; iterator++){
+		std::cout << "Print first 10 args, or until null char: \n";
+		if (args_list[iterator] != NULL){
+			std::cout << args_list[iterator] << "\n";
+		}
+	}
+	//check for built-ins
+	//if built-in, run it
+	//else skip to end
+	return 1; //change to launch program
 }
 
 char *parse(){
@@ -32,7 +49,7 @@ char **tokenize(char *line){
 	
 	token = strtok(line, delimeter);
 	while (token != NULL){
-		tokens[i] = token;
+		tokens[i] = token; // potentially uninitialized but ignoring for now
 		i++;
 		token = strtok(NULL, delimeter);
 	}
