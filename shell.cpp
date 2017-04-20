@@ -30,7 +30,6 @@ int execute(char **args_list){
 }
 
 char *parse(){
-	//TODO: test? it compiles
 	std::string read;
 	std::getline(std::cin, read); //thank you c++ gods for making this function
 	char *read_c = new char[read.length() + 1];
@@ -42,7 +41,6 @@ char *parse(){
 }
 
 char **tokenize(char *line){
-	//TODO: test? 
 	int buf = 640; //maybe reallocate when full later?
 	char *token;
 	char **tokens = (char**) malloc(buf * sizeof(char*));
