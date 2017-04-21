@@ -9,10 +9,11 @@
 #include <cstring>
 #include <csignal>
 #include <unistd.h>
+#include <sys/wait.h>
 
 sig_atomic_t exit_counter = 0;
 
-/*Doesn't work...*/
+
 void handler_function(int parameter){
 	if(exit_counter == 1){
 		exit(EXIT_SUCCESS);
@@ -72,7 +73,7 @@ char *parse(){
 	std::strcpy (read_c, read.c_str());
 	
 	//for testing
-	std::cout << "Parsed successfully \n";
+	//	std::cout << "Parsed successfully \n";
 	return read_c;
 }
 
@@ -93,7 +94,7 @@ char **tokenize(char *line){
 	tokens[i] = NULL;
 	
 	//for testing
-	std::cout << "Tokenized successfully \n";
+	//std::cout << "Tokenized successfully \n";
 	return tokens;
 }
 
