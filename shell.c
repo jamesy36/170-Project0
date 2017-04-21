@@ -23,11 +23,40 @@ void handler_function(int parameter){
 }
 
 void launch(char** args){
-	pid_t pid = fork();
-	if(pid){
+	int i = 0;
+	char in_key[] = "<";
+	char out_key[] = ">";
+	int meta_in = 0;
+	int meta_out = 0;
+	while (args[i] != NULL){
+		if(strcmp(args[i], in_key)){
+			meta_in++;
+		}
+		if(strcmp(args[i], out_key)){
+			meta_out++;
+		}
+		i++;
+	}
+	
+	pid_t pid;
+	if ((pid = fork()) < 0){
+		prinf("ERROR FORKING\n");
+		exit(EXIT_FAILURE);
+	}
+	else if(pid){
 		waitpid(pid, NULL, 0);
 	}
 	else{
+		if (meta_in){
+			int fd0 = open(input, 0_RDONLY);
+			dup2(fd0, STDIN_FILENO);
+			close(fd0);
+		}
+		if (meta_out){
+			int fd1 = creat(output, 0644);
+			dup2(fd1, STDOUT_FILENO);
+			close(fd1);
+		}
 		execvp(*args, args);
 	}
 }
