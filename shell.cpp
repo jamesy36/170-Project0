@@ -8,6 +8,7 @@
 #include <string> //getline
 #include <cstring>
 #include <csignal>
+#include <unistd.h>
 
 sig_atomic_t exit_counter = 0;
 
@@ -21,8 +22,18 @@ void handler_function(int parameter){
 	}
 }
 
+void launch(char** args){
+	pid_t pid = fork();
+	if(pid){
+		waitpid(pid, NULL, 0);
+	}
+	else{
+		execvp(*args, args);
+	}
+}
+
 int execute(char **args_list){
-	signal (SIGTSTP, handler_function);
+	signal (SIGINT, handler_function);
 	//1 means keep looping, 0 means stop execution
 	int iterator;
 	char key[] = "exit";
@@ -36,6 +47,9 @@ int execute(char **args_list){
 		return 0;
 	}
 	
+	launch(args_list);
+	
+	/*
 	//temp loop for testing
 	for (iterator = 0; iterator < 10; iterator++){
 		std::cout << "Print first 10 args, or until null char: \n";
@@ -43,6 +57,7 @@ int execute(char **args_list){
 			std::cout << args_list[iterator] << "\n";
 		}
 	}
+	* */
 	//check for built-ins
 	//if built-in, run it
 	//else skip to end
@@ -50,7 +65,7 @@ int execute(char **args_list){
 }
 
 char *parse(){
-	signal (SIGTSTP, handler_function);
+	signal (SIGINT, handler_function);
 	std::string read;
 	std::getline(std::cin, read); //thank you c++ gods for making this function
 	char *read_c = new char[read.length() + 1];
@@ -62,7 +77,7 @@ char *parse(){
 }
 
 char **tokenize(char *line){
-	signal (SIGTSTP, handler_function);
+	signal (SIGINT, handler_function);
 	int buf = 640; //maybe reallocate when full later?
 	char *token;
 	char **tokens = (char**) malloc(buf * sizeof(char*));
@@ -84,7 +99,7 @@ char **tokenize(char *line){
 
 void shell_loop(){
 	
-	signal (SIGTSTP, handler_function);
+	signal (SIGINT, handler_function);
 	char **split_args;
 	char *read_line;
 	//used for terminating while loop
@@ -110,7 +125,7 @@ void shell_loop(){
 
 
 int main(int argc, char **argv){
-	signal (SIGTSTP, handler_function);
+	signal (SIGINT, handler_function);
 	
 	//run command loop
 	shell_loop();
