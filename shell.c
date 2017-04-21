@@ -11,7 +11,10 @@
 #include <unistd.h>
 #include <fcntl.h>
 
+#define MAX_CMD_SZ 512;
+#define MAX_TKN_SZ 32;
 
+const char* SHELL_NAME = "propShell> ";
 sig_atomic_t exit_counter = 0;
 
 
@@ -145,7 +148,7 @@ void launch(char** args){
 	}
 }
 
-int execute(char **args_list){
+void execute(char **args_list){
 	signal (SIGTSTP, handler_function);
 	//1 means keep looping, 0 means stop execution
 	int iterator;
@@ -214,7 +217,7 @@ char **tokenize(char *line){
 	//std::cout << "Tokenized successfully \n";
 	return tokens;
 }
-
+/*
 void shell_loop(){
 	
 	signal (SIGTSTP, handler_function);
@@ -240,13 +243,43 @@ void shell_loop(){
 	}while(running);
 }
 
-
-
+*/
+/*
 int main(int argc, char **argv){
+
+
 	signal (SIGTSTP, handler_function);
 	
 	//run command loop
 	shell_loop();
 	
 	return EXIT_SUCCESS;
+}
+*/
+
+int main(){
+char cmd [MAX_CMD_SZ];
+char* args [MAX_TKN_SZ];
+while(1){
+
+
+printf("SHELL_NAME");
+fgets(cmd, MAX_CMD_SZ, stdin);
+
+
+signal (SIGTSTP, handler_function);
+	char **split_args;
+	char *read_line;
+
+
+		read_line = parse();
+		
+		//separate line into command and args
+		split_args = tokenize(read_line);
+		
+		//execute command
+		execute(split_args);
+
+}
+
 }
