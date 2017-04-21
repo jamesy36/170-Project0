@@ -7,13 +7,36 @@
 #include <cstdlib>
 #include <string> //getline
 #include <cstring>
+#include <csignal>
+
+sig_atomic_t exit_counter = 0;
+
+/*Doesn't work...*/
+void handler_function(int parameter){
+	if (exit_counter == 2){
+		exit(EXIT_SUCCESS);
+	}
+	else if(exit_counter == 1){
+		exit_counter++;
+	}
+	else if(exit_counter == 0){
+		exit_counter++;
+	}
+}
 
 int execute(char **args_list){
+	signal (SIGINT, handler_function);
 	//1 means keep looping, 0 means stop execution
 	int iterator;
+	char key[] = "exit";
 	
 	if (args_list[0] == NULL){
 		return 1;
+	}
+	
+	else if (!strcmp(args_list[0], key)){
+		//std::cout<<"successfully exited\n";
+		return 0;
 	}
 	
 	//temp loop for testing
@@ -30,6 +53,7 @@ int execute(char **args_list){
 }
 
 char *parse(){
+	//signal(SIGTSTP, handler());
 	std::string read;
 	std::getline(std::cin, read); //thank you c++ gods for making this function
 	char *read_c = new char[read.length() + 1];
@@ -41,6 +65,7 @@ char *parse(){
 }
 
 char **tokenize(char *line){
+	//signal(SIGTSTP, handler());
 	int buf = 640; //maybe reallocate when full later?
 	char *token;
 	char **tokens = (char**) malloc(buf * sizeof(char*));
@@ -49,7 +74,7 @@ char **tokenize(char *line){
 	
 	token = strtok(line, delimeter);
 	while (token != NULL){
-		tokens[i] = token; // potentially uninitialized but ignoring for now
+		tokens[i] = token;
 		i++;
 		token = strtok(NULL, delimeter);
 	}
@@ -61,6 +86,8 @@ char **tokenize(char *line){
 }
 
 void shell_loop(){
+	
+	//signal(SIGTSTP, handler());
 	
 	char **split_args;
 	char *read_line;
@@ -84,7 +111,10 @@ void shell_loop(){
 	}while(running);
 }
 
+
+
 int main(int argc, char **argv){
+	//signal(SIGTSTP, handler());
 	
 	//run command loop
 	shell_loop();
