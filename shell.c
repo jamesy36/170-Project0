@@ -3,14 +3,14 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/wait.h>
-#include <cstdio.h>
+#include <stdio.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <ctype.h>
 #include <unistd.h>
-#include <csignal>
-#include <cstring>
+//#include <csignal>
+//#include <cstring>
 
 sig_atomic_t exit_counter = 0;
 
@@ -157,7 +157,7 @@ char *parse(){
 	std::string read;
 	std::getline(std::cin, read); //thank you c++ gods for making this function
 	char *read_c = new char[read.length() + 1];
-	std::strcpy (read_c, read.c_str());
+	strcpy (read_c, read.c_str());
 	
 	//for testing
 	//	std::cout << "Parsed successfully \n";
