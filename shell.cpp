@@ -35,7 +35,7 @@ void launch(char** args){
 }
 
 int execute(char **args_list){
-	signal (SIGINT, handler_function);
+	signal (SIGTSTP, handler_function);
 	//1 means keep looping, 0 means stop execution
 	int iterator;
 	char key[] = "exit";
@@ -67,7 +67,7 @@ int execute(char **args_list){
 }
 
 char *parse(){
-	signal (SIGINT, handler_function);
+	signal (SIGTSTP, handler_function);
 	std::string read;
 	std::getline(std::cin, read); //thank you c++ gods for making this function
 	char *read_c = new char[read.length() + 1];
@@ -79,7 +79,7 @@ char *parse(){
 }
 
 char **tokenize(char *line){
-	signal (SIGINT, handler_function);
+	signal (SIGTSTP, handler_function);
 	int buf = 640; //maybe reallocate when full later?
 	char *token;
 	char **tokens = (char**) malloc(buf * sizeof(char*));
@@ -101,7 +101,7 @@ char **tokenize(char *line){
 
 void shell_loop(){
 	
-	signal (SIGINT, handler_function);
+	signal (SIGTSTP, handler_function);
 	char **split_args;
 	char *read_line;
 	//used for terminating while loop
@@ -127,7 +127,7 @@ void shell_loop(){
 
 
 int main(int argc, char **argv){
-	signal (SIGINT, handler_function);
+	signal (SIGTSTP, handler_function);
 	
 	//run command loop
 	shell_loop();
