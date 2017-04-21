@@ -28,12 +28,16 @@ void launch(char** args){
 	char out_key[] = ">";
 	int meta_in = 0;
 	int meta_out = 0;
+	int input_i = 0;
+	int output_i = 0;
 	while (args[i] != NULL){
 		if(strcmp(args[i], in_key)){
-			meta_in++;
+			meta_in = 1;
+			input_i = i + 1;
 		}
 		if(strcmp(args[i], out_key)){
-			meta_out++;
+			meta_out = 1;
+			output_i = i + 1;
 		}
 		i++;
 	}
@@ -48,12 +52,12 @@ void launch(char** args){
 	}
 	else{
 		if (meta_in){
-			int fd0 = open(input, 0_RDONLY);
+			int fd0 = open(args[input_i], 0_RDONLY);
 			dup2(fd0, STDIN_FILENO);
 			close(fd0);
 		}
 		if (meta_out){
-			int fd1 = creat(output, 0644);
+			int fd1 = creat(args[output_i], 0644);
 			dup2(fd1, STDOUT_FILENO);
 			close(fd1);
 		}
