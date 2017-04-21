@@ -3,12 +3,10 @@
 // CS170 SPRING 2017
 // C++ implementation of a basic UNIX shell
 // shell.cpp
-#include <iostream>
-#include <cstdio> 
-#include <cstdlib>
-#include <string> //getline
-#include <cstring>
-#include <csignal>
+#include <stdio.h> 
+#include <stdlib.h>
+#include <string.h> //getline
+#include <signal.h>
 #include <unistd.h>
 #include <sys/wait.h>
 
@@ -68,14 +66,12 @@ int execute(char **args_list){
 
 char *parse(){
 	signal (SIGTSTP, handler_function);
-	std::string read;
-	std::getline(std::cin, read); //thank you c++ gods for making this function
-	char *read_c = new char[read.length() + 1];
-	std::strcpy (read_c, read.c_str());
-	
+	char *read = NULL;
+	size_t buf = 0;
+	getline(&read, &buf, stdin); //thank you c++ gods for making this function
 	//for testing
 	//	std::cout << "Parsed successfully \n";
-	return read_c;
+	return read;
 }
 
 char **tokenize(char *line){
@@ -110,7 +106,7 @@ void shell_loop(){
 	do{
 		//idk... because that's what shells do for some reason.. 
 		//looks fresh I guess
-		std::cout << "> ";
+	  printf("> ");
 		
 		//read line
 		read_line = parse();
