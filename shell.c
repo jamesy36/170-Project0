@@ -1,5 +1,5 @@
-//cs170.cpp
-#include <iostream>
+//cs170.c
+
 #include <stdlib.h>
 #include <string.h>
 #include <sys/wait.h>
@@ -9,26 +9,17 @@
 #include <sys/stat.h>
 #include <ctype.h>
 #include <unistd.h>
-//#include <csignal>
-//#include <cstring>
+#include <fcntl.h>
+
 
 sig_atomic_t exit_counter = 0;
 
-using namespace std;
 
 struct command
 {
-  const char **argv;
+   char **argv;
 };
 
-void echo(char **tokens) //probably need to account for meta characters
-{
- 	for(int i = 1; tokens[i] != NULL; i++){
- 		write(1,tokens[i], strlen(tokens[i]));
- 		write(1," ",1);
- 	}
- 	write(1, "\n",1);
-}
 
 
 int spawn_proc(int input, int output, struct command *cmd){
@@ -54,9 +45,9 @@ int piping(int n, struct command *cmd){
 	int fd[2];
 	int input = 0; //first process will get input from og file desc
 
-for(int i =0; i < n-1; i++){
+for(i=0; i < n-1; i++){
 	pipe(fd);
-	spawn_proc(input, fd[1], cmd +i); //f[1] is the write end of the pipe
+	spawn_proc(input, fd[1], cmd + i); //f[1] is the write end of the pipe
 	close(fd[1]); //child begins the write
 	input = fd[0]; //keep the read end of pipe, next child will begin to read
 }
@@ -82,7 +73,7 @@ test ()
 
   struct command cmd [] = { {ls}, {awk}, {sort}, {uniq} };
 
-  return fork_pipes (4, cmd);
+  return  piping(4, cmd);
 }
 */
 
@@ -98,8 +89,9 @@ int find_in_args(char** args, char* target){
 			break;
 		}
 	}
-
+	return found;
 }
+
 
 void handler_function(int parameter){
 	if(exit_counter == 1){
@@ -111,23 +103,63 @@ void handler_function(int parameter){
 }
 
 void launch(char** args){
-	pid_t pid = fork();
-	if(pid){
+	int i = 0;
+	char in_key[] = "<";
+	char out_key[] = ">";
+	int meta_in = 0;
+	int meta_out = 0;
+	int input_i = 0;
+	int output_i = 0;
+	while (args[i] != NULL){
+		if(strcmp(args[i], in_key)){
+			meta_in = 1;
+			input_i = i + 1;
+		}
+		if(strcmp(args[i], out_key)){
+			meta_out = 1;
+			output_i = i + 1;
+		}
+		i++;
+	}
+	
+	pid_t pid;
+	if ((pid = fork()) < 0){
+		printf("ERROR FORKING\n");
+		exit(EXIT_FAILURE);
+	}
+	else if(pid){
 		waitpid(pid, NULL, 0);
 	}
 	else{
+		if (meta_in){
+			int fd0 = open(args[input_i], O_RDONLY);
+			dup2(fd0, STDIN_FILENO);
+			close(fd0);
+		}
+		if (meta_out){
+			int fd1 = creat(args[output_i], 0644);
+			dup2(fd1, STDOUT_FILENO);
+			close(fd1);
+		}
 		execvp(*args, args);
 	}
 }
 
 int execute(char **args_list){
-	signal (SIGINT, handler_function);
+	signal (SIGTSTP, handler_function);
 	//1 means keep looping, 0 means stop execution
 	int iterator;
 	char key[] = "exit";
 	
 	if (args_list[0] == NULL){
 		return 1;
+	}
+
+	else if(find_in_args(args_list, "|") != -1){
+
+		struct command cmd [] = {args_list};
+		return piping(2, cmd);
+
 	}
 	
 	else if (!strcmp(args_list[0], key)){
@@ -153,19 +185,17 @@ int execute(char **args_list){
 }
 
 char *parse(){
-	signal (SIGINT, handler_function);
-	std::string read;
-	std::getline(std::cin, read); //thank you c++ gods for making this function
-	char *read_c = new char[read.length() + 1];
-	strcpy (read_c, read.c_str());
-	
+	signal (SIGTSTP, handler_function);
+	char *read = NULL;
+	size_t buf = 0;
+	getline(&read, &buf, stdin); //thank you c++ gods for making this function
 	//for testing
 	//	std::cout << "Parsed successfully \n";
-	return read_c;
+	return read;
 }
 
 char **tokenize(char *line){
-	signal (SIGINT, handler_function);
+	signal (SIGTSTP, handler_function);
 	int buf = 640; //maybe reallocate when full later?
 	char *token;
 	char **tokens = (char**) malloc(buf * sizeof(char*));
@@ -187,7 +217,7 @@ char **tokenize(char *line){
 
 void shell_loop(){
 	
-	signal (SIGINT, handler_function);
+	signal (SIGTSTP, handler_function);
 	char **split_args;
 	char *read_line;
 	//used for terminating while loop
@@ -196,7 +226,7 @@ void shell_loop(){
 	do{
 		//idk... because that's what shells do for some reason.. 
 		//looks fresh I guess
-		std::cout << "> ";
+	  printf("> ");
 		
 		//read line
 		read_line = parse();
@@ -213,7 +243,7 @@ void shell_loop(){
 
 
 int main(int argc, char **argv){
-	signal (SIGINT, handler_function);
+	signal (SIGTSTP, handler_function);
 	
 	//run command loop
 	shell_loop();
