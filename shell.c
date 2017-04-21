@@ -9,6 +9,9 @@
 #include <signal.h>
 #include <unistd.h>
 #include <sys/wait.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <fcntl.h>
 
 sig_atomic_t exit_counter = 0;
 
@@ -44,7 +47,7 @@ void launch(char** args){
 	
 	pid_t pid;
 	if ((pid = fork()) < 0){
-		prinf("ERROR FORKING\n");
+		printf("ERROR FORKING\n");
 		exit(EXIT_FAILURE);
 	}
 	else if(pid){
@@ -52,7 +55,7 @@ void launch(char** args){
 	}
 	else{
 		if (meta_in){
-			int fd0 = open(args[input_i], 0_RDONLY);
+			int fd0 = open(args[input_i], O_RDONLY);
 			dup2(fd0, STDIN_FILENO);
 			close(fd0);
 		}
