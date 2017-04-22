@@ -26,6 +26,9 @@ sig_atomic_t exit_counter = 0;
  *   Makefile  simple  simple_shell.c
  *   shell: exit
 **/
+struct commands{
+  const char **argv;
+};
 
 void handler_function(int parameter){
   if(exit_counter == 1){
@@ -75,6 +78,8 @@ void split_arg(char** args, char** split_args, int split_point){
     // printf("%s\n", split_args[temp]);
     // }
   }
+
+//TODO:
 
 void launch(char** args){
     signal (SIGTSTP, handler_function);
@@ -130,6 +135,7 @@ void launch(char** args){
       }
     }
     else if (find_arg(args, "|") != -1){
+      /*
       int pos = find_arg(args, "|");
       int input = STDIN_FILENO;
       int output = STDOUT_FILENO;
@@ -172,6 +178,9 @@ void launch(char** args){
       else{
   wait(0);
       }
+    } */
+
+      pipeHandler(args);
     }
     else{
       pid = fork();
@@ -183,6 +192,125 @@ void launch(char** args){
       }
     }
   }
+// Function below for multiple pipes, but I thought it was easier to just make a function for pipes
+void pipeHandler(char * args[]){
+  // File descriptors
+  int file[2];
+  int file2[2];
+  
+  int cmds = 0;
+  
+  char *command[256];
+  
+  pid_t pid;
+  
+  int err = -1;
+  int end = 0;
+  
+  // Variables used for the different loops
+  int i = 0;
+  int j = 0;
+  int k = 0;
+  int l = 0;
+  
+ 
+  while (args[l] != NULL){
+    if (strcmp(args[l],"|") == 0){
+      cmds++;
+    }
+    l++;
+  }
+  cmds++;
+
+  while (args[j] != NULL && end != 1){
+    k = 0;
+
+    while (strcmp(args[j],"|") != 0){
+      command[k] = args[j];
+      j++;  
+      if (args[j] == NULL){
+
+        end = 1;
+        k++;
+        break;
+      }
+      k++;
+    }
+
+    command[k] = NULL;
+    j++;    
+    
+    if (i % 2 != 0){
+      pipe(file); // for odd i
+    }else{
+      pipe(file2); // for even i
+    }
+    
+    pid=fork();
+    
+    if(pid==-1){      
+      if (i != cmds - 1){
+        if (i % 2 != 0){
+          close(file[1]); // for odd i
+        }else{
+          close(file2[1]); // for even i
+        } 
+      }     
+      printf("Child process could not be created\n");
+      return;
+    }
+    if(pid==0){
+      // If we are in the first command
+      if (i == 0){
+        dup2(file2[1], STDOUT_FILENO);
+      }
+      
+      else if (i == cmds - 1){
+        if (cmds % 2 != 0){ 
+          dup2(file[0],STDIN_FILENO);
+        }else{ 
+          dup2(file2[0],STDIN_FILENO);
+        }
+      }else{ 
+        if (i % 2 != 0){
+          dup2(file2[0],STDIN_FILENO); 
+          dup2(file[1],STDOUT_FILENO);
+        }else{ 
+          dup2(file[0],STDIN_FILENO); 
+          dup2(file[1],STDOUT_FILENO);          
+        } 
+      }
+      
+      if (execvp(command[0],command)==err){
+        kill(getpid(),SIGTERM);
+      }   
+    }
+        
+    // Closing desc on parents
+    if (i == 0){
+      close(file2[1]);
+    }
+    else if (i == cmds - 1){
+      if (cmds % 2 != 0){         
+        close(file[0]);
+      }else{          
+        close(file2[0]);
+      }
+    }else{
+      if (i % 2 != 0){          
+        close(file2[0]);
+        close(file[1]);
+      }else{          
+        close(file[0]);
+        close(file2[1]);
+      }
+    }
+        
+    waitpid(pid,NULL,0);
+        
+    i++;  
+  }
+}
 
 
 
@@ -196,21 +324,32 @@ int main(){
     	char* command = NULL;
     	char* arguments[MAX_TOKEN_COUNT];
     	int argument_count = 0;
-
+      int meta_count = 0;
+      int pipe_count = 0;
     	char* token = strtok(line, " ");
     	while(token) {
       		if(!command) command = token;
       		arguments[argument_count] = token;
 	      	argument_count++;
+          if((arguments[argument_count] == "<")||(arguments[argument_count] == ">")){
+            meta_count++;
+          }
+          if(arguments[argument_count] == "|"){
+            pipe_count++;
+          }
       		token = strtok(NULL, " ");
     	}
     	arguments[argument_count] = NULL;
-	if(argument_count>0){
+	if((argument_count>0)&& (meta_count <= 1)&&(pipe_count <= 1)){
 		if (strcmp(arguments[0], "exit") == 0)
             		exit(0);
     		//runcommand(command, arguments);
         launch(arguments);
 	}
+    else if((argument_count>0)&& (meta_count > 1)&&(pipe_count > 1)){
+      //struct commands cmd[] = {{command}};
+     // return fork_pipes(pipe_count, cmd);
+    }
         //printf("shell: "); 
     }
     return 0;
